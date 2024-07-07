@@ -36,12 +36,12 @@ def findMatchedFiles(baseFolder: str, sourceFilePatternPrefix: str = "DATA_", so
     return matchedFilesList
 
 
+# List of files purged
+purgeConfirmations = []
+
+
 # Iterates through a list of files, deletes them, and passes purged file paths into list
 def filePurger(fileList: list):
-    ## List of files purged
-    global purgeConfirmations
-    purgeConfirmations = []
-
     ## Iterates through file list to purge
     for filePath in fileList:
         os.remove(filePath)
@@ -70,8 +70,10 @@ def purgeFiles(sourceFolder):
         scheduler.enterabs(thresholdDate.timestamp(), 1, filePurger, argument=(purgeFilesList,))
         scheduler.run()
     except FileNotFoundError:
+        print()
     else:
         return purgeConfirmations
+
 
 # Runs in debug mode
 if __name__ == "__main__":
