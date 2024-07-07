@@ -39,6 +39,7 @@ def findMatchedFiles(baseFolder: str, sourceFilePatternPrefix: str = "DATA_", so
 # Iterates through a list of files, deletes them, and passes purged file paths into list
 def filePurger(fileList: list):
     ## List of files purged
+    global purgeConfirmations
     purgeConfirmations = []
 
     ## Iterates through file list to purge
@@ -47,8 +48,6 @@ def filePurger(fileList: list):
         ### If file no longer exists, append a confirmation message to the list
         if not os.path.exists(filePath):
             purgeConfirmations.append(f"{filePath} purged")
-
-    return purgeConfirmations
 
 
 # Initialize API
@@ -59,17 +58,20 @@ api = Api(app)
 # Purge files at the given directory in the URL on threshold date
 @app.route('/<path:sourceFolder>')  # r"C://Users/trivi/Desktop/sample"
 def purgeFiles(sourceFolder):
-    ## Returns list of files to be purged
-    purgeFilesList = findMatchedFiles(baseFolder=sourceFolder)
+    try:
+        ## Returns list of files to be purged
+        purgeFilesList = findMatchedFiles(baseFolder=sourceFolder)
 
-    ## Calculate threshold date from current date and execute the file purging
-    scheduler = sched.scheduler(time.time, time.sleep)
-    givenDate = datetime.now()
-    retentionDuration = timedelta(days=5)
-    thresholdDate = givenDate - retentionDuration
-    scheduler.enterabs(thresholdDate.timestamp(), 1, filePurger, argument=(purgeFilesList,))
-    scheduler.run()
-
+        ## Calculate threshold date from current date and execute the file purging
+        scheduler = sched.scheduler(time.time, time.sleep)
+        givenDate = datetime.now()
+        retentionDuration = timedelta(days=5)
+        thresholdDate = givenDate - retentionDuration
+        scheduler.enterabs(thresholdDate.timestamp(), 1, filePurger, argument=(purgeFilesList,))
+        scheduler.run()
+    except FileNotFoundError:
+    else:
+        return purgeConfirmations
 
 # Runs in debug mode
 if __name__ == "__main__":
