@@ -28,9 +28,11 @@ def findMatchedFiles(baseFolder: str, sourceFilePatternPrefix: str = "DATA_", so
     for file in filesList:
         matchedFile = re.findall(sourceFilePattern, file)
         if not matchedFile == []:
-            ### Appends absolute file path as a string to the list
+            #### Appends absolute file path as a string to the list
             matchedFileAbsPath = createAbsFilePath(baseDirectory=baseFolder, fileName=matchedFile[0])
             matchedFilesList.append(matchedFileAbsPath)
+        else:
+            raise FileNotFoundError
 
     ## Returns list of absolute paths of all matching files
     return matchedFilesList
@@ -70,7 +72,7 @@ def purgeFiles(sourceFolder):
         scheduler.enterabs(thresholdDate.timestamp(), 1, filePurger, argument=(purgeFilesList,))
         scheduler.run()
     except FileNotFoundError:
-        print()
+        return "No matching files found, please try a different file name or extension."
     else:
         return purgeConfirmations
 
